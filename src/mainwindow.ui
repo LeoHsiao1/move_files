@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>827</width>
-    <height>309</height>
+    <height>341</height>
    </rect>
   </property>
   <property name="font">
@@ -223,6 +223,18 @@
              </item>
             </widget>
            </item>
+           <item row="1" column="4">
+            <widget class="QCheckBox" name="regular_match_flag">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>使用正则匹配</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
@@ -304,31 +316,6 @@ p, li { white-space: pre-wrap; }
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>827</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>设置</string>
-    </property>
-    <addaction name="regular_match_flag"/>
-   </widget>
-   <addaction name="menu"/>
-  </widget>
-  <action name="regular_match_flag">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>文件名正则匹配</string>
-   </property>
-  </action>
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
@@ -336,6 +323,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>src_dir</tabstop>
   <tabstop>choose_src_dir</tabstop>
   <tabstop>file_pattern</tabstop>
+  <tabstop>regular_match_flag</tabstop>
   <tabstop>dst_dir</tabstop>
   <tabstop>choose_dst_dir</tabstop>
   <tabstop>start_buttion</tabstop>
