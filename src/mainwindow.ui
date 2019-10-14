@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>827</width>
-    <height>341</height>
+    <width>752</width>
+    <height>294</height>
    </rect>
   </property>
   <property name="font">
@@ -20,8 +20,11 @@
    <string>批量移动文件</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>res/img/logo.ico</normaloff>res/img/logo.ico</iconset>
+   <iconset resource="resource.qrc">
+    <normaloff>:/resource/img/logo.ico</normaloff>:/resource/img/logo.ico</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>false</bool>
@@ -34,6 +37,9 @@
        <font>
         <pointsize>9</pointsize>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -97,6 +103,9 @@
             <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
           </property>
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
@@ -329,7 +338,9 @@ p, li { white-space: pre-wrap; }
   <tabstop>start_buttion</tabstop>
   <tabstop>log_view</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>start_buttion</sender>
