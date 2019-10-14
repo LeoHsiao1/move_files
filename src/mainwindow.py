@@ -9,17 +9,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
-                             QMainWindow)
-
-
-class EmittingStream(QObject):
-    output = pyqtSignal(str)  	# 定义output信号，接收一个str参数
-
-    def write(self, text):
-        self.output.emit(str(text))
-
-    def flush(self):
-        pass
+                             QMainWindow, QMessageBox)
 
 
 class MainWindow(QMainWindow):
@@ -28,14 +18,10 @@ class MainWindow(QMainWindow):
         uic.loadUi("mainwindow.ui", self)
         self.center()
 
-        # 重定向stdout、stderr，让它们触发output信号，并把信号绑定到logger槽函数
-        sys.stdout = EmittingStream(output=self.logger)
-        sys.stderr = sys.stdout
-
-    def logger(self, text):  # 定义接收log信号的槽函数
+    def logger(self, string, end='\n'):  # 定义接收log信号的槽函数
         """ 接收log信号的槽函数，用于记录日志 """
         self.log_view.moveCursor(QTextCursor.End)
-        self.log_view.insertPlainText(text)
+        self.log_view.insertPlainText(str(string) + end)
 
     def center(self):
         """ 使窗口显示在屏幕中心 """
@@ -44,12 +30,13 @@ class MainWindow(QMainWindow):
         geometry.moveCenter(center)
         self.setGeometry(geometry)
 
-    def choose_dir(self):
+    def choose_src_dir_slot(self):
         _dir = QFileDialog.getExistingDirectory(w, "选择目录", ".")
-        if self.sender() == self.choose_src_dir:
-            self.src_dir.setText(_dir)
-        elif self.sender() == self.choose_dst_dir:
-            self.dst_dir.setText(_dir)
+        self.src_dir.setText(_dir)
+
+    def choose_dst_dir_slot(self):
+        _dir = QFileDialog.getExistingDirectory(w, "选择目录", ".")
+        self.dst_dir.setText(_dir)
 
     def start(self):
         """ 按下开始按钮则触发该函数，开始移动或拷贝文件。 """
@@ -61,61 +48,68 @@ class MainWindow(QMainWindow):
             file_pattern = self.file_pattern.text()
 
             # 启用进度条
-            print("【开始】")
+            self.logger("【开始】")
             self.progressBar.setEnabled(True)
             self.progressBar.setValue(0)
-
-            # 定义match()函数，用于判断文件名是否匹配
-            if self.regular_match_flag.isChecked():
-                try:
-                    pattern = re.compile(file_pattern)
-                except re.error as e:
-                    raise ValueError("无效的正则表达式：{}".format(e))
-
-                def match(name, pattern):
-                    return re.search(pattern, name)  # 采用正则匹配
-            else:
-                match = fnmatch  # 采用通配符匹配
 
             # 判断是移动还是拷贝
             if operation_name == "移动":
                 __transfer_files = shutil.move
             elif operation_name == "拷贝":
                 __transfer_files = shutil.copy
+
+            # 检查输入的目录是否有效
+            if not os.path.isdir(src_dir):
+                raise ValueError('输入的目录不存在：{}'.format(src_dir))
+            if not os.path.isdir(dst_dir):
+                raise ValueError('输入的目录不存在：{}'.format(dst_dir))
+
+            # 定义match()函数，用于判断文件名是否匹配
+            if self.regular_match_flag.isChecked():
+                try:
+                    pattern = re.compile(file_pattern)
+                except re.error as e:
+                    raise ValueError("文件名不是有效的正则表达式：{}".format(e))
+
+                def match(name, pattern):
+                    return re.search(pattern, name)  # 采用正则匹配
             else:
-                raise ValueError('选中的动作不是"移动"或"拷贝"。')
+                match = fnmatch  # 采用通配符匹配
 
             # 更新进度
-            print("准备{}...".format(operation_name))
-            print("寻找名字匹配的所有文件...", end="")
+            self.logger("准备{}...".format(operation_name))
+            self.logger("寻找名字匹配的所有文件...")
             self.progressBar.setValue(5)
 
             # 查找名字匹配的所有文件
             src_files = []
-            for basepath, dirnames, filenames in os.walk(src_dir, onerror=print):
+            for basepath, dirnames, filenames in os.walk(src_dir, onerror=self.logger):
                 for filename in filenames:
                     if match(filename, file_pattern):
                         src_files.append(os.path.join(basepath, filename))
             length = len(src_files)
 
             # 更新进度
-            print("一共有{}个".format(length))
+            self.logger("名字匹配的文件一共有{}个".format(length))
             self.progressBar.setValue(10)
 
             # 进行移动或拷贝
             for i, path in enumerate(src_files):
                 __transfer_files(path, dst_dir)
 
-                print("已处理：{}".format(path))
+                self.logger("已处理：{}".format(path))
                 self.progressBar.setValue(10 + 90 * ((i+1) / length))   # 更新进度
 
             # 使进度条失效
             self.progressBar.setValue(100)
             self.progressBar.setEnabled(False)
-            print("【结束】")
+            self.logger("【结束】\n\n")
+            QMessageBox.information(self, "提示", "成功完成！")
+
         except Exception as e:
-            # print(traceback.format_exc())
-            print(str(e))
+            # self.logger(traceback.format_exc())
+            self.logger("错误：" + str(e))
+            QMessageBox.critical(self, "错误", str(e))
 
 
 if __name__ == "__main__":
